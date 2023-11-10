@@ -24,6 +24,7 @@ MENU = {
     }
 }
 
+profit = 0
 resources = {
     "water": 300,
     "milk": 300,
@@ -31,10 +32,9 @@ resources = {
 }
 
 
-def print_resources():
+def print_report():
+    print(f"Money: ${profit}")
     for entry in resources:
-        if entry == "money":
-            print("$", end="")
         print(f"{entry}: {resources[entry]}", end="")
         if entry == "water" or entry == "milk":
             print("ml")
@@ -44,12 +44,12 @@ def print_resources():
 
 # Returns a list of any resources which are insufficient for the requested drink
 def get_insufficient_resources(drink: str) -> list:
-    sufficient_resources = []
+    insufficient_resources = []
     drink_ingredients = MENU[user_choice]['ingredients']
     for entry in drink_ingredients:
         if resources[entry] < drink_ingredients[entry]:
-            sufficient_resources.append(entry)
-    return sufficient_resources
+            insufficient_resources.append(entry)
+    return insufficient_resources
 
 
 operating = True
@@ -66,7 +66,7 @@ def make_drink(drink: str):
         print('☕')
     elif drink == 'espresso':
         print('☕☕')
-    print("Enjoy!")
+    print("Enjoy!\n")
 
 
 def process_coins(user_choice: str) -> bool:
@@ -139,7 +139,7 @@ def print_insufficient_resources(drink: str, resources_in_deficit: list):
 while operating:
     user_choice = input("What would you like? (espresso, latte, cappuccino)\n").lower()
     if user_choice == 'report':
-        print_resources()
+        print_report()
     elif user_choice == 'off':
         # input "off" -> stop the program
         operating = False
@@ -151,6 +151,7 @@ while operating:
             # process_coins will loop through asking user to submit enough coins for the drink
             drink_paid = process_coins(user_choice)
             if drink_paid:
+                profit = MENU[user_choice]['cost']
                 make_drink(user_choice)
             else:
                 print(f"{user_choice.title()} purchase was unsuccessful. Returning to drink menu.")
