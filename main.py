@@ -25,9 +25,9 @@ MENU = {
 }
 
 resources = {
-    "water": 100,
-    "milk": 3,
-    "coffee": 5,
+    "water": 300,
+    "milk": 300,
+    "coffee": 500,
 }
 
 
@@ -55,12 +55,60 @@ def get_insufficient_resources(drink: str) -> list:
 operating = True
 
 
-def make_drink(user_choice):
-    pass
+def make_drink(drink: str):
+    # Loop through each ingredient and subtract its required amount from our total resources
+    for entry in MENU[user_choice]['ingredients']:
+        resources[entry] -= MENU[user_choice]['ingredients'][entry]
+    print(f"Here is your {drink}!")
+    if drink == 'latte':
+        print('☕🍶')
+    elif drink == 'cappuccino':
+        print('☕')
+    elif drink == 'espresso':
+        print('☕☕')
+    print("Enjoy!")
 
 
-def process_coins(user_choice):
-    pass
+def process_coins(user_choice: str) -> bool:
+    user_choice_price = MENU[user_choice]['cost']
+    balance = user_choice_price
+    str_balance = '${:,.2f}'.format(balance)
+    print(f"A {user_choice} costs {str_balance}. Please insert equivalent coins now "
+          f"(enter 'penny', 'nickel', 'dime', 'quarter', 'loonie', or 'toonie' one by one) or enter 'c' to cancel.")
+    paid = False
+    while not paid:
+        str_balance = '${:,.2f}'.format(balance)
+        coin = input(f'{str(str_balance)} is the remaining balance.\n').lower()
+        if coin == 'c':
+            str_change = ' Returning already submitted money totalling ${:,.2f}.'.format(user_choice_price - balance) \
+                if user_choice_price - balance >= 0.01 else ''
+            print(f"Cancelling order. {str_change}")
+            break
+        elif coin.isalpha():
+            if coin == 'penny':
+                balance -= 0.01
+            elif coin == 'nickel':
+                balance -= 0.05
+            elif coin == 'dime':
+                balance -= 0.10
+            elif coin == 'quarter':
+                balance -= 0.25
+            elif coin == 'loonie' or coin == 'one':
+                balance -= 1
+            elif coin == 'toonie' or coin == 'two':
+                balance -= 2
+            else:
+                print(f"I'm sorry, '{coin}' doesn't appear to be a valid entry.")
+                continue
+            print(f"{coin.title()} accepted. ", end="")
+        else:
+            print("I'm sorry, that doesn't appear to be a valid entry.")
+        if balance < 0.01:
+            paid = True
+            str_change = f' Your change is {"${:,.2f}".format(abs(balance))}.' if abs(balance) > 0.01 else ""
+            print(f"\nBalance paid in full.{str_change} Drink will now be dispensed.")
+            return True
+    return False
 
 
 def print_insufficient_resources(drink: str, resources_in_deficit: list):
@@ -93,17 +141,19 @@ while operating:
     if user_choice == 'report':
         print_resources()
     elif user_choice == 'off':
-        # "off" -> stop the program
+        # input "off" -> stop the program
         operating = False
         break
     elif user_choice == 'latte' or user_choice == 'cappuccino' or user_choice == 'espresso':
         insufficient_resources = get_insufficient_resources(user_choice)
         # Check if there are no insufficient resources
         if len(insufficient_resources) == 0:
-            process_coins(user_choice)
-            # TODO: Process the coins and determine if they are sufficient
-            # TODO: If the coins are sufficient, make the drink and subtract used resources
-            # TODO: If the coins are insufficient, inform the user and void the transaction
+            # process_coins will loop through asking user to submit enough coins for the drink
+            drink_paid = process_coins(user_choice)
+            if drink_paid:
+                make_drink(user_choice)
+            else:
+                print(f"{user_choice.title()} purchase was unsuccessful. Returning to drink menu.")
         else:
             print_insufficient_resources(user_choice, insufficient_resources)
 
