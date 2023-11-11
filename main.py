@@ -33,7 +33,7 @@ resources = {
 
 
 def print_report():
-    print(f"Money: ${profit}")
+    print(f"Money: {'${:,.2f}'.format(profit)}")
     for entry in resources:
         print(f"{entry}: {resources[entry]}", end="")
         if entry == "water" or entry == "milk":
